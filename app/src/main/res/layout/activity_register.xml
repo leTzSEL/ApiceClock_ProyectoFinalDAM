@@ -48,6 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Email"
+            android:textStyle="bold"
             android:textColor="#000000" />
 
         <!-- Password -->
@@ -63,7 +64,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Password"
+            android:text="Contraseña"
+            android:textStyle="bold"
             android:textColor="#000000" />
 
         <EditText
@@ -76,12 +78,13 @@
 
         <!-- Botón -->
         <Button
-            android:id="@+id/signInButton"
+            android:id="@+id/UserRegisteredButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:background="#1C1C1C"
-            android:text="Sign In"
+            android:text="Registrarse"
+            android:textStyle="bold"
             android:textColor="#FFFFFF" />
     </LinearLayout>
 

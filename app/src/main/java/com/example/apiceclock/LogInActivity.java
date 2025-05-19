@@ -1,6 +1,8 @@
 package com.example.apiceclock;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,5 +22,15 @@ public class LogInActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        Button bttnUserLogIn = findViewById(R.id.signInButton);
+
+        bttnUserLogIn.setOnClickListener(v -> {
+            Intent intent = new Intent(LogInActivity.this, ControlHoursActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
+
     }
 }
