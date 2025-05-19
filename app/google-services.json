@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "695543293831",
+    "project_id": "apiceclock",
+    "storage_bucket": "apiceclock.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:695543293831:android:73e9eab2d6be03b8af5522",
+        "android_client_info": {
+          "package_name": "com.apicedecor.apiceclock"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvFBLM_Rk-FvKEg_7_gDUQ--j4bgLo4iM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
