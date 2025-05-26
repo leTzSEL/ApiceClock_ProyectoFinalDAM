@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.apiceclock"
+    namespace = "com.apicedecor.apiceclock"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.apiceclock"
+        applicationId = "com.apicedecor.apiceclock"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

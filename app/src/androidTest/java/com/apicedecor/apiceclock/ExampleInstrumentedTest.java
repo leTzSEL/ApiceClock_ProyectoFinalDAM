@@ -1,4 +1,4 @@
-package com.example.apiceclock;
+package com.apicedecor.apiceclock;
 
 import android.content.Context;
 
