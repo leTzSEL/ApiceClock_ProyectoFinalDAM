@@ -12,11 +12,18 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.firebase.Firebase;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
     private FirebaseAuth autenticacionFirebase;
-    private EditText emailInput, passwordInput;
+    private FirebaseFirestore firestore;
+    private EditText emailInput, passwordInput, nameInput, surnameInput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,25 +37,45 @@ public class RegisterActivity extends AppCompatActivity {
         });
 
         autenticacionFirebase = FirebaseAuth.getInstance();
+        firestore = FirebaseFirestore.getInstance();
+
+        nameInput = findViewById(R.id.nameInput);
+        surnameInput = findViewById(R.id.surnameInput);
         emailInput = findViewById(R.id.emailInput);
         passwordInput = findViewById(R.id.passwordInput);
 
         Button btnUserRegistrado = findViewById(R.id.UserRegisteredButton);
 
         btnUserRegistrado.setOnClickListener(view -> {
+            String name = nameInput.getText().toString().trim();
+            String surname = surnameInput.getText().toString().trim();
             String email = emailInput.getText().toString().trim();
             String password = passwordInput.getText().toString().trim();
 
-            if (!email.isEmpty() && !password.isEmpty()) {
+            if (!name.isEmpty() && !surname.isEmpty() && !email.isEmpty() && !password.isEmpty()) {
                 autenticacionFirebase.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        Toast.makeText(RegisterActivity.this, "Usuario registrado correctamente", Toast.LENGTH_SHORT).show();
+                        FirebaseUser user = autenticacionFirebase.getCurrentUser();
+                        String userId = user.getUid();
 
-                        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();//eliminamos la pantalla de la carga
+                        //Guardamos en Firestore
+                        Map<String, Object> userMap = new HashMap<>();
+                        userMap.put("name", name);
+                        userMap.put("surname", surname);
+                        userMap.put("email", email);
+
+                        firestore.collection("users").document(userId).set(userMap).addOnSuccessListener(aVoid -> {
+                            Toast.makeText(RegisterActivity.this, "Usuario registrado correctamente", Toast.LENGTH_SHORT).show();
+
+                            //vuelve a MainActivity
+                            startActivity(new Intent(RegisterActivity.this, MainActivity.class));
+                            finish();//eliminamos la pantalla de la carga
+                        }).addOnFailureListener(e -> {
+                            Toast.makeText(RegisterActivity.this, "Error al guardar datos: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        });
+
                     } else {
-                        Toast.makeText(RegisterActivity.this, "Error al registrarse"+ task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RegisterActivity.this, "Error al registrarse" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
             } else {
