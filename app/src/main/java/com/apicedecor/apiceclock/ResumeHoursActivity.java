@@ -1,9 +1,9 @@
 package com.apicedecor.apiceclock;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.Button;
 import android.widget.TextView;
-import android.os.Handler;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,35 +14,14 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-
-public class ControlHoursActivity extends AppCompatActivity {
-
-    private TextView tvTimer, tvTimerLabel;
-    private Button btnStartStop;
-    private Handler handler = new Handler();
-    private long startTime = 0L;
-    private boolean isRunning = false;
-
-    private FirebaseAuth firebaseAuth;
-    private DatabaseReference databaseReference;
-
-    private String userId;
-    private String userName;
-    private String userSurname;
-    private String userEmail;
-
-    private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-    private SimpleDateFormat hourMinFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+public class ResumeHoursActivity extends AppCompatActivity {
 
     private Runnable timerRunnable;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_control_hours);
+        setContentView(R.layout.activity_resume_hours);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);

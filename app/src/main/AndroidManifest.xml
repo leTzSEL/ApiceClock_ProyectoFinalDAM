@@ -13,6 +13,9 @@
         android:theme="@style/Theme.ApiceClock"
         tools:targetApi="31">
         <activity
+            android:name=".ResumeHoursActivity"
+            android:exported="false" />
+        <activity
             android:name=".ControlHoursActivity"
             android:exported="false" />
         <activity
