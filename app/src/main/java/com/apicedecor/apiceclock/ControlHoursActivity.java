@@ -3,6 +3,7 @@ package com.apicedecor.apiceclock;
 import static android.text.format.DateUtils.formatElapsedTime;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -33,9 +34,9 @@ import java.util.TimeZone;
 
 public class ControlHoursActivity extends AppCompatActivity {
 
-    private TextView tvTimer, tvTimerLabel;
+    private TextView tvTimer;
     private Button btnStartStop;
-    private ImageButton btnHome, btnSummary;
+    private ImageButton btnSummary;
     private Handler handler = new Handler();
 
     private boolean isRunning = false;
@@ -46,6 +47,11 @@ public class ControlHoursActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private DatabaseReference databaseRef;
+
+    private static final String PREFS_NAME = "timerPrefs";
+    private static final String KEY_START_TIME = "startTimeMillis";
+
+    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,17 +65,13 @@ public class ControlHoursActivity extends AppCompatActivity {
         });
 
         tvTimer = findViewById(R.id.tvTimer);
-        tvTimerLabel = findViewById(R.id.tvTimerLabel);
         btnStartStop = findViewById(R.id.btnStartStop);
-        btnHome = findViewById(R.id.btnHome);
         btnSummary = findViewById(R.id.btnSummary);
 
         mAuth = FirebaseAuth.getInstance();
 
         databaseRef = FirebaseDatabase.getInstance().getReference("workhours");
 
-        //actualizamos le reloj de la pantalla
-        startClock();
 
         btnStartStop.setOnClickListener(v -> {
             if (!isRunning) {
@@ -83,14 +85,13 @@ public class ControlHoursActivity extends AppCompatActivity {
             // Navega a pantalla ResumeHoursActivity
             Intent intent = new Intent(ControlHoursActivity.this, ResumeHoursActivity.class);
             startActivity(intent);
-            finish();
         });
     }
 
     private void startTimer() {
         isRunning = true;
         btnStartStop.setText("DETENER");
-        btnStartStop.setBackgroundTintList(ContextCompat.getColorStateList(this, android.R.color.holo_green_dark));
+        btnStartStop.setBackgroundTintList(ContextCompat.getColorStateList(this, android.R.color.holo_red_light));
 
         startTimeMillis = System.currentTimeMillis();
         elapsedMillis = 0L;
@@ -107,21 +108,10 @@ public class ControlHoursActivity extends AppCompatActivity {
         handler.post(timerRunnable);
     }
 
-    private void startClock() {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                String currentTime = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
-                tvTimerLabel.setText("Hora actual: " + currentTime);
-                handler.postDelayed(this, 1000);
-            }
-        }, 0);
-    }
-
     private void stopTimer() {
         isRunning = false;
         btnStartStop.setText("INICIAR");
-        btnStartStop.setBackgroundTintList(ContextCompat.getColorStateList(this, android.R.color.holo_red_light));
+        btnStartStop.setBackgroundTintList(ContextCompat.getColorStateList(this, android.R.color.holo_green_dark));
 
         handler.removeCallbacks(timerRunnable);
 

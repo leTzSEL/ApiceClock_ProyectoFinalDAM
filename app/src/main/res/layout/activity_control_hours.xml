@@ -51,12 +51,11 @@
         app:layout_constraintBottom_toTopOf="@+id/bottomNav">
 
         <TextView
-            android:id="@+id/tvTimerLabel"
-            android:layout_width="wrap_content"
+            android:id="@+id/textView"
+            android:layout_width="266dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:text="Tiempo transcurrido"
-            android:textColor="@android:color/black"
+            android:textAlignment="center"
             android:textSize="20sp" />
 
         <TextView
