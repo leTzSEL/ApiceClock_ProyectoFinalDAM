@@ -70,8 +70,20 @@ public class ControlHoursActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
+        prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         databaseRef = FirebaseDatabase.getInstance().getReference("workhours");
 
+        startTimeMillis = prefs.getLong(KEY_START_TIME, 0L);
+        if (startTimeMillis != 0L) {
+            // Si había cronómetro en marcha antes, lo ponemos en marcha y calculamos elapsedMillis actual
+            isRunning = true;
+            btnStartStop.setText("DETENER");
+            btnStartStop.setBackgroundTintList(ContextCompat.getColorStateList(this, android.R.color.holo_red_light));
+
+            elapsedMillis = System.currentTimeMillis() - startTimeMillis;
+
+            startTimerRunnable();
+        }
 
         btnStartStop.setOnClickListener(v -> {
             if (!isRunning) {
@@ -88,15 +100,24 @@ public class ControlHoursActivity extends AppCompatActivity {
         });
     }
 
+
     private void startTimer() {
         isRunning = true;
         btnStartStop.setText("DETENER");
         btnStartStop.setBackgroundTintList(ContextCompat.getColorStateList(this, android.R.color.holo_red_light));
 
         startTimeMillis = System.currentTimeMillis();
+
+        // Guarda el tiempo de inicio en SharedPreferences
+        prefs.edit().putLong(KEY_START_TIME, startTimeMillis).apply();
+
         elapsedMillis = 0L;
 
         saveWorkrHour(true);
+        startTimerRunnable();
+    }
+
+    private void startTimerRunnable() {
         timerRunnable = new Runnable() {
             @Override
             public void run() {
@@ -115,7 +136,13 @@ public class ControlHoursActivity extends AppCompatActivity {
 
         handler.removeCallbacks(timerRunnable);
 
-        saveWorkrHour(false); // Guardar fin
+        handler.removeCallbacks(timerRunnable);
+
+        // Borra el tiempo guardado porque paramos el cronómetro
+        prefs.edit().remove(KEY_START_TIME).apply();
+
+        saveWorkrHour(false);
+
     }
 
     private String formatElapsedTime(long milis) {
