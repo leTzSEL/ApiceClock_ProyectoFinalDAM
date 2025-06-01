@@ -9,6 +9,8 @@
     tools:context=".LogInActivity">
 
     <!-- Título -->
+
+    <!-- Contenedor blanco -->
     <TextView
         android:id="@+id/titleText"
         android:layout_width="wrap_content"
@@ -16,15 +18,14 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginStart="74dp"
-        android:layout_marginTop="131dp"
-        android:layout_marginEnd="79dp"
+        android:layout_marginStart="79dp"
+        android:layout_marginTop="132dp"
+        android:layout_marginEnd="73dp"
         android:text="INICIAR SESION"
         android:textColor="#FFFFFF"
         android:textSize="34sp"
         android:textStyle="bold" />
 
-    <!-- Contenedor blanco -->
     <LinearLayout
         android:id="@+id/loginContainer"
         android:layout_width="wrap_content"

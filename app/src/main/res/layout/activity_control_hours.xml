@@ -83,7 +83,7 @@
     <LinearLayout
         android:id="@+id/bottomNav"
         android:layout_width="0dp"
-        android:layout_height="64dp"
+        android:layout_height="74dp"
         android:orientation="horizontal"
         android:background="#1C3E76"
         android:gravity="center"
