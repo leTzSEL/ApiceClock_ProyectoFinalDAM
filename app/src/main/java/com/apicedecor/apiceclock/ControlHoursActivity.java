@@ -1,7 +1,5 @@
 package com.apicedecor.apiceclock;
 
-import static android.text.format.DateUtils.formatElapsedTime;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -23,11 +21,14 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -153,7 +154,6 @@ public class ControlHoursActivity extends AppCompatActivity {
         return String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds);
     }
 
-    //Funciones trabajador
     private void saveWorkrHour(boolean isStart) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -186,46 +186,80 @@ public class ControlHoursActivity extends AppCompatActivity {
 
                             if (isStart) {
                                 // Guardamos datos de INICIO
-                                Map<String, Object> workData = new HashMap<>();
-                                workData.put("name", name);
-                                workData.put("surname", surname);
-                                workData.put("email", email);
-                                workData.put("date", date);
-                                workData.put("startTime", hour);
-                                workData.put("startTimestamp", System.currentTimeMillis());
+                                Map<String, Object> startInterval = new HashMap<>();
+                                startInterval.put("startTime", hour);
+                                startInterval.put("startTimestamp", System.currentTimeMillis());
 
-                                workHourRef.set(workData)
-                                        .addOnSuccessListener(aVoid -> Log.d("ControlHoursActivity", "Datos de INICIO guardados"))
-                                        .addOnFailureListener(e -> Log.e("ControlHoursActivity", "Error al guardar datos de INICIO: " + e.getMessage()));
+                                // Añadir el nuevo intervalo con solo el inicio (end se completará después)
+                                workHourRef.get().addOnSuccessListener(docSnap -> {
+                                    if (docSnap.exists()) {
+                                        // Ya existe: añadir el intervalo al array
+                                        workHourRef.update("intervals", FieldValue.arrayUnion(startInterval))
+                                                .addOnSuccessListener(aVoid -> Log.d("ControlHoursActivity", "Nuevo intervalo de inicio añadido"))
+                                                .addOnFailureListener(e -> Log.e("ControlHoursActivity", "Error al añadir intervalo: " + e.getMessage()));
+                                    } else {
+                                        // No existe: crear documento con datos generales y el primer intervalo
+                                        Map<String, Object> workData = new HashMap<>();
+                                        workData.put("name", name);
+                                        workData.put("surname", surname);
+                                        workData.put("email", email);
+                                        workData.put("date", date);
+                                        workData.put("intervals", Collections.singletonList(startInterval));
+
+                                        workHourRef.set(workData)
+                                                .addOnSuccessListener(aVoid -> Log.d("ControlHoursActivity", "Documento creado con primer intervalo"))
+                                                .addOnFailureListener(e -> Log.e("ControlHoursActivity", "Error al crear documento: " + e.getMessage()));
+                                    }
+                                });
 
                             } else {
-                                // Guardamos datos de FIN y calculamos duración
+                                // Guardamos datos de FIN y calculamos duración del intervalo
                                 long endTimestamp = System.currentTimeMillis();
 
-                                workHourRef.get().addOnSuccessListener(documentSnapshot1 -> {
-                                    if (documentSnapshot1.exists() && documentSnapshot1.contains("startTimestamp")) {
-                                        long startTimestamp = documentSnapshot1.getLong("startTimestamp");
+                                workHourRef.get().addOnSuccessListener(docSnap -> {
+                                    if (docSnap.exists()) {
+                                        List<Map<String, Object>> intervals = (List<Map<String, Object>>) docSnap.get("intervals");
+                                        if (intervals != null && !intervals.isEmpty()) {
+                                            // Buscar el último intervalo sin endTime
+                                            Map<String, Object> lastInterval = intervals.get(intervals.size() - 1);
+                                            if (!lastInterval.containsKey("endTime")) {
+                                                long startTimestamp = (long) lastInterval.get("startTimestamp");
+                                                long diffMillis = endTimestamp - startTimestamp;
+                                                long totalSeconds = diffMillis / 1000;
+                                                long hours = totalSeconds / 3600;
+                                                long minutes = (totalSeconds % 3600) / 60;
 
-                                        // Calcular diferencia
-                                        long diffMillis = endTimestamp - startTimestamp;
-                                        long totalSeconds = diffMillis / 1000;
-                                        long hours = totalSeconds / 3600;
-                                        long minutes = (totalSeconds % 3600) / 60;
+                                                String totalHoursFormatted = String.format(Locale.getDefault(), "%02d:%02d", hours, minutes);
 
-                                        // Formato final: "HH:mm"
-                                        String totalHoursFormatted = String.format(Locale.getDefault(), "%02d:%02d", hours, minutes);
+                                                lastInterval.put("endTime", hour);
+                                                lastInterval.put("endTimestamp", endTimestamp);
+                                                lastInterval.put("duration", totalHoursFormatted);
 
-                                        Map<String, Object> endData = new HashMap<>();
-                                        endData.put("endTime", hour);
-                                        endData.put("endTimestamp", endTimestamp);
-                                        endData.put("totalHours", totalHoursFormatted);
+                                                // Actualizar el campo intervals en Firestore
+                                                workHourRef.update("intervals", intervals)
+                                                        .addOnSuccessListener(aVoid -> Log.d("ControlHoursActivity", "Intervalo actualizado con FIN"))
+                                                        .addOnFailureListener(e -> Log.e("ControlHoursActivity", "Error al actualizar intervalo: " + e.getMessage()));
 
-                                        workHourRef.update(endData)
-                                                .addOnSuccessListener(aVoid -> Log.d("ControlHoursActivity", "Datos de FIN y totalHours guardados"))
-                                                .addOnFailureListener(e -> Log.e("ControlHoursActivity", "Error al guardar datos de FIN: " + e.getMessage()));
+                                                // Calcular y actualizar el total del día
+                                                long totalMillis = 0;
+                                                for (Map<String, Object> interval : intervals) {
+                                                    if (interval.containsKey("startTimestamp") && interval.containsKey("endTimestamp")) {
+                                                        long s = (long) interval.get("startTimestamp");
+                                                        long e = (long) interval.get("endTimestamp");
+                                                        totalMillis += (e - s);
+                                                    }
+                                                }
 
-                                    } else {
-                                        Log.e("ControlHoursActivity", "No existe startTimestamp para calcular duración");
+                                                long totalSecondsDay = totalMillis / 1000;
+                                                long totalHoursDay = totalSecondsDay / 3600;
+                                                long totalMinutesDay = (totalSecondsDay % 3600) / 60;
+                                                String totalDayFormatted = String.format(Locale.getDefault(), "%02d:%02d", totalHoursDay, totalMinutesDay);
+
+                                                workHourRef.update("totalHours", totalDayFormatted)
+                                                        .addOnSuccessListener(aVoid -> Log.d("ControlHoursActivity", "Total diario actualizado: " + totalDayFormatted))
+                                                        .addOnFailureListener(e -> Log.e("ControlHoursActivity", "Error al actualizar total diario: " + e.getMessage()));
+                                            }
+                                        }
                                     }
                                 });
                             }
@@ -238,5 +272,6 @@ public class ControlHoursActivity extends AppCompatActivity {
                     });
         }
     }
+
 
 }
