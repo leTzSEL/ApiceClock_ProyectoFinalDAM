@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.pdf.PdfDocument;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -240,6 +242,20 @@ public class ResumeHoursActivity extends AppCompatActivity {
         try {
             pdfDocument.writeTo(new FileOutputStream(file));
             Toast.makeText(this, "PDF generado en:\n" + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+
+            // *** ABRIR AUTOMÁTICAMENTE EL PDF ***
+            Uri pdfUri = FileProvider.getUriForFile(
+                    this,
+                    getPackageName() + ".provider", // ¡Asegúrate de tenerlo configurado!
+                    file
+            );
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(pdfUri, "application/pdf");
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            startActivity(intent);
+
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(this, "Error al crear PDF: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -247,6 +263,7 @@ public class ResumeHoursActivity extends AppCompatActivity {
 
         pdfDocument.close();
     }
+
 
     private void loadWorkHours() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
