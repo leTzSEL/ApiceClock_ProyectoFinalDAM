@@ -1,13 +1,13 @@
 package com.apicedecor.apiceclock;
 
 public class WorkHourEntry {
-    String date;          // "30-05-2025"
+    String date;
     String name;
     String surname;
     String email;
-    long startTimestamp;  // millis
-    long endTimestamp;    // millis
-    int totalMinutes;     // total minutos trabajados, calculado
+    long startTimestamp;
+    long endTimestamp;
+    int totalMinutes;
 
     public WorkHourEntry(String date, String name, String surname, String email, long startTimestamp, long endTimestamp) {
         this.date = date;

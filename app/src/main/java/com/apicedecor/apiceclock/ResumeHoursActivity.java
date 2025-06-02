@@ -96,7 +96,7 @@ public class ResumeHoursActivity extends AppCompatActivity {
             return;
         }
 
-        String mesAnoActual = getMesAnoActual(); // "MM-yyyy" ejemplo: "05-2025"
+        String mesAnoActual = getMesAnoActual(); // MM-yyyy
         resumenList.clear();
 
         db.collection("workHours")
@@ -112,8 +112,8 @@ public class ResumeHoursActivity extends AppCompatActivity {
                         Map<String, Integer> minutosPorDia = new HashMap<>();
 
                         for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                            String fecha = doc.getString("date"); // ej. "30-05-2025"
-                            String totalHours = doc.getString("totalHours"); // ej. "00:18"
+                            String fecha = doc.getString("date");
+                            String totalHours = doc.getString("totalHours");
 
                             if (esMesDeInteres(fecha, mesAnoActual)) {
                                 String[] partes = totalHours.split(":");
@@ -182,16 +182,33 @@ public class ResumeHoursActivity extends AppCompatActivity {
         return user != null ? user.getEmail() : "";
     }
 
+    // Convierte un String "HH:mm" a decimal
+    private float convertTimeToDecimal(String time) {
+        try {
+            String[] parts = time.split(":");
+            int hours = Integer.parseInt(parts[0]);
+            int minutes = Integer.parseInt(parts[1]);
+            return hours + (minutes / 60f);
+        } catch (Exception e) {
+            return 0f; // En caso de formato inválido
+        }
+    }
+
+    // Convierte decimal a String "HH:mm
+    private String convertDecimalToTime(float decimalHours) {
+        int hours = (int) decimalHours;
+        int minutes = Math.round((decimalHours - hours) * 60);
+        return String.format("%02d:%02d", hours, minutes);
+    }
+
     private void createPDF() {
         if (resumenList.isEmpty()) {
             Toast.makeText(this, "No hay datos para exportar", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Crear documento PDF
         PdfDocument pdfDocument = new PdfDocument();
 
-        // Crear página con tamaño A4 (595x842 puntos)
         PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(595, 842, 1).create();
         PdfDocument.Page page = pdfDocument.startPage(pageInfo);
         Canvas canvas = page.getCanvas();
@@ -202,7 +219,7 @@ public class ResumeHoursActivity extends AppCompatActivity {
 
         int y = 40;
 
-        // Escribir cabecera con datos del usuario y mes
+        // Cabecera con datos usuario y mes
         canvas.drawText("Resumen de Horas - " + mes, 40, y, paint);
         y += 25;
         canvas.drawText("Nombre: " + nombre + " " + apellido, 40, y, paint);
@@ -210,7 +227,7 @@ public class ResumeHoursActivity extends AppCompatActivity {
         canvas.drawText("Correo: " + correo, 40, y, paint);
         y += 30;
 
-        // Escribir tabla: Fecha - Horas trabajadas
+        // Tabla: Fecha - Horas trabajadas
         paint.setTextSize(12);
         canvas.drawText("Fecha", 40, y, paint);
         canvas.drawText("Horas trabajadas", 200, y, paint);
@@ -220,18 +237,28 @@ public class ResumeHoursActivity extends AppCompatActivity {
         canvas.drawLine(40, y, 550, y, paint);
         y += 20;
 
-        // Escribir cada resumen del día
+        float totalHoras = 0f;
+
         for (DaySummary ds : resumenList) {
-            if (y > 800) break; // para evitar salir de la página
+            if (y > 800) break;
 
             canvas.drawText(ds.getDate(), 40, y, paint);
             canvas.drawText(ds.getTotalHours(), 200, y, paint);
             y += 20;
+
+            totalHoras += convertTimeToDecimal(ds.getTotalHours());
         }
+
+        paint.setTextSize(14);
+        y += 20;
+
+        // Mostrar total horas en formato HH:mm
+        String totalEnTiempo = convertDecimalToTime(totalHoras);
+        String totalTexto = "TOTAL HORAS: " + totalEnTiempo;
+        canvas.drawText(totalTexto, 40, y, paint);
 
         pdfDocument.finishPage(page);
 
-        // Guardar archivo PDF en la carpeta Documents/ApiceDecor con nombre "Resumen-MM-YYYY.pdf"
         String fileName = "Resumen-" + new SimpleDateFormat("MM-yyyy", Locale.getDefault()).format(new Date()) + ".pdf";
         File directory = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "ApiceDecor");
         if (!directory.exists()) directory.mkdirs();
@@ -242,10 +269,9 @@ public class ResumeHoursActivity extends AppCompatActivity {
             pdfDocument.writeTo(new FileOutputStream(file));
             Toast.makeText(this, "PDF generado en:\n" + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
 
-            // *** ABRIR AUTOMÁTICAMENTE EL PDF ***
             Uri pdfUri = FileProvider.getUriForFile(
                     this,
-                    getPackageName() + ".provider", // ¡Asegúrate de tenerlo configurado!
+                    getPackageName() + ".provider",
                     file
             );
 
@@ -262,6 +288,7 @@ public class ResumeHoursActivity extends AppCompatActivity {
 
         pdfDocument.close();
     }
+
 
 
     private void loadWorkHours() {

@@ -190,7 +190,7 @@ public class ControlHoursActivity extends AppCompatActivity {
                                 startInterval.put("startTime", hour);
                                 startInterval.put("startTimestamp", System.currentTimeMillis());
 
-                                // Añadir el nuevo intervalo con solo el inicio (end se completará después)
+                                // Añadir el nuevo intervalo con solo el inicio
                                 workHourRef.get().addOnSuccessListener(docSnap -> {
                                     if (docSnap.exists()) {
                                         // Ya existe: añadir el intervalo al array
