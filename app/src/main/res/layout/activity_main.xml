@@ -23,13 +23,13 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintVertical_bias="1.0" />
 
     <ImageView
         android:id="@+id/appLogo"
         android:layout_width="194dp"
         android:layout_height="259dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="76dp"
         android:contentDescription="Logo de la app"
         android:src="@drawable/logo_transparente"
         app:layout_constraintEnd_toEndOf="parent"
@@ -41,18 +41,21 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="268dp"
         android:text="APICECLOCK"
         android:textColor="#FFFFFF"
         android:textSize="48sp"
         android:textStyle="bold"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="62dp"
-        tools:layout_editor_absoluteY="209dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonLogIn"
         android:layout_width="220dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="344dp"
         android:backgroundTint="#A1B9E6"
         android:text="Iniciar Sesión"
         android:textColor="#000000"
@@ -63,9 +66,10 @@
         app:iconPadding="5dp"
         app:iconSize="40dp"
         app:iconTint="#000000"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="96dp"
-        tools:layout_editor_absoluteY="294dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/background" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonRegister"
@@ -83,6 +87,7 @@
         app:iconSize="40dp"
         app:iconTint="#000000"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/buttonLogIn" />
 
